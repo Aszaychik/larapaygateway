@@ -133,19 +133,19 @@ class DonationController extends Controller
         //
     }
 
-    public function notification(Request $request)
+    public function notification()
     {
         $notif = new Notification();
         \DB::transaction(function() use($notif) {
 
-          $transaction = $notif->transaction_status;
-          $type = $notif->payment_type;
+          $transactionStatus = $notif->transaction_status;
+          $paymentType = $notif->payment_type;
           $orderId = $notif->order_id;
           $fraud = $notif->fraud_status;
-          $donation = Donation::findOrFail($orderId);
+          $donation = Donation::where('donation_code', $orderId)->first();
 
-          if ($transaction == 'capture') {
-            if ($type == 'credit_card') {
+          if ($transactionStatus == 'capture') {
+            if ($paymentType == 'credit_card') {
 
               if($fraud == 'challenge') {
                 $donation->setStatusPending();
@@ -154,23 +154,23 @@ class DonationController extends Controller
               }
 
             }
-          } elseif ($transaction == 'settlement') {
+          } elseif ($transactionStatus == 'settlement') {
 
             $donation->setStatusSuccess();
 
-          } elseif($transaction == 'pending'){
+          } elseif($transactionStatus == 'pending'){
 
               $donation->setStatusPending();
 
-          } elseif ($transaction == 'deny') {
+          } elseif ($transactionStatus == 'deny') {
 
               $donation->setStatusFailed();
 
-          } elseif ($transaction == 'expire') {
+          } elseif ($transactionStatus == 'expire') {
 
               $donation->setStatusExpired();
 
-          } elseif ($transaction == 'cancel') {
+          } elseif ($transactionStatus == 'cancel') {
 
               $donation->setStatusFailed();
 
