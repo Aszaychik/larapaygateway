@@ -14,4 +14,3 @@
 
 
 Route::get('/', 'DonationController@index');
-Route::post('/', 'DonationController@store');

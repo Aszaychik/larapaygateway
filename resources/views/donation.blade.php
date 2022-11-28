@@ -107,7 +107,7 @@
     <script>
         $("#donation_form").submit(function(event) {
             event.preventDefault();
-            $.post("/", {
+            $.post("/api/", {
                 _method: 'POST',
                 _token: '{{ csrf_token() }}',
                 name: $('input#name').val(),
