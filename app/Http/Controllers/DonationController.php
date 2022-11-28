@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Donation;
 use Illuminate\Http\Request;
+use Midtrans\Config;
 use Midtrans\Snap;
 
 class DonationController extends Controller
@@ -13,6 +14,14 @@ class DonationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct()
+    {
+    Config::$serverKey = config('services.midtrans.serverKey');
+    Config::$isProduction = config('services.midtrans.isProduction');
+    Config::$isSanitized = config('services.midtrans.isSanitized');
+    Config::$is3ds = config('services.midtrans.is3ds');
+    }
+
     public function index()
     {
         return view('donation');
@@ -47,7 +56,7 @@ class DonationController extends Controller
 
             $payload = [
                 'transaction_details' => [
-                    'order_id'      => 'SANDBOX-' . uniqid(),
+                    'order_id'      => $donation->id,
                     'gross_amount'  => $donation->amount,
                 ],
                 'customer_details' => [

@@ -26,7 +26,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item active">
-                    <a class="nav-link" href="/donation">Donation <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/">Donation <span class="sr-only">(current)</span></a>
                 </li>
             </ul>
         </div>
@@ -86,7 +86,7 @@
                 </div>
             </div>
 
-            <button class="btn btn-primary" type="submit">Send</button>
+            <button class="btn btn-primary" type="submit">Kirim</button>
         </form>
     </div>
 
@@ -98,14 +98,16 @@
     </script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js">
     </script>
-    <script src="{{
-        !config('services.midtrans.isProduction') ? 'https://app.sandbox.midtrans.com/snap/snap.js' : 'https://app.midtrans.com/snap/snap.js' }}"
+    <script
+        type="text/javascript"
+        src="https://app.sandbox.midtrans.com/snap/snap.js"
         data-client-key="{{ config('services.midtrans.clientKey')
-    }}"></script>
+    }}">
+    </script>
     <script>
         $("#donation_form").submit(function(event) {
             event.preventDefault();
-            $.post("/api/donation", {
+            $.post("/", {
                 _method: 'POST',
                 _token: '{{ csrf_token() }}',
                 name: $('input#name').val(),
