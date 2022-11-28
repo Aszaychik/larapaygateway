@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Donation;
 use Illuminate\Http\Request;
+use Midtrans\Snap;
 
 class DonationController extends Controller
 {
@@ -35,7 +36,44 @@ class DonationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        \DB::transaction(function () use($request){
+            $donation = Donation::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'donation_type' => $request->donation_type,
+                'amount' => floatval($request->amount),
+                'note' => $request->note,
+            ]);
+
+            $payload = [
+                'transaction_details' => [
+                    'order_id'      => 'SANDBOX-' . uniqid(),
+                    'gross_amount'  => $donation->amount,
+                ],
+                'customer_details' => [
+                    'name'      => $donation->name,
+                    'email'     => $donation->email,
+                    // 'phone'         => '08888888888',
+                    // 'address'       => '',
+                ],
+                'item_details' => [
+                    [
+                        'id'       => $donation->donation_type,
+                        'price'    => $donation->amount,
+                        'quantity' => 1,
+                        'name'     => ucwords(str_replace('_', ' ', $donation->donation_type))
+                    ]
+                ]
+            ];
+
+            $snapToken = Snap::getSnapToken($payload);
+            $donation->snap_token = $snapToken;
+            $donation->save();
+
+            $this->response['snap_token'] = $snapToken;
+        });
+
+        return response()->json($this->response);
     }
 
     /**
