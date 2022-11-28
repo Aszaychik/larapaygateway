@@ -25,7 +25,8 @@ class DonationController extends Controller
 
     public function index()
     {
-        return view('donation');
+        $donations = Donation::orderBy('id', 'desc')->paginate(8);
+        return view('welcome', compact('donations'));
     }
 
     /**
@@ -35,7 +36,7 @@ class DonationController extends Controller
      */
     public function create()
     {
-        //
+        return view('donation');
     }
 
     /**
@@ -141,7 +142,7 @@ class DonationController extends Controller
           $type = $notif->payment_type;
           $orderId = $notif->order_id;
           $fraud = $notif->fraud_status;
-          $donation = Donation::where('donation_code', $orderId)->first();
+          $donation = Donation::findOrFail($orderId);
 
           if ($transaction == 'capture') {
             if ($type == 'credit_card') {

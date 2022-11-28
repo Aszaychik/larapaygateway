@@ -14,3 +14,4 @@
 
 
 Route::get('/', 'DonationController@index');
+Route::get('/donation', 'DonationController@create');

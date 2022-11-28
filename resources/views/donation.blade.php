@@ -100,14 +100,15 @@
     </script>
     <script
         type="text/javascript"
-        src="https://app.sandbox.midtrans.com/snap/snap.js"
+        src="{{
+            !config('services.midtrans.isProduction') ? 'https://app.sandbox.midtrans.com/snap/snap.js' : 'https://app.midtrans.com/snap/snap.js' }}"
         data-client-key="{{ config('services.midtrans.clientKey')
     }}">
     </script>
     <script>
         $("#donation_form").submit(function(event) {
             event.preventDefault();
-            $.post("/api/", {
+            $.post("/api/donation", {
                 _method: 'POST',
                 _token: '{{ csrf_token() }}',
                 name: $('input#name').val(),
