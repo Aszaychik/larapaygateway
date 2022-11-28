@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Donation;
 use Illuminate\Http\Request;
 use Midtrans\Config;
+use Midtrans\Notification;
 use Midtrans\Snap;
 
 class DonationController extends Controller
@@ -47,6 +48,7 @@ class DonationController extends Controller
     {
         \DB::transaction(function () use($request){
             $donation = Donation::create([
+                'donation_code' => 'ASZ-' . uniqid(),
                 'name' => $request->name,
                 'email' => $request->email,
                 'donation_type' => $request->donation_type,
@@ -56,7 +58,7 @@ class DonationController extends Controller
 
             $payload = [
                 'transaction_details' => [
-                    'order_id'      => $donation->id,
+                    'order_id'      => $donation->donation_code,
                     'gross_amount'  => $donation->amount,
                 ],
                 'customer_details' => [
@@ -128,5 +130,53 @@ class DonationController extends Controller
     public function destroy(Donation $donation)
     {
         //
+    }
+
+    public function notification(Request $request)
+    {
+        $notif = new Notification();
+        \DB::transaction(function() use($notif) {
+
+          $transaction = $notif->transaction_status;
+          $type = $notif->payment_type;
+          $orderId = $notif->order_id;
+          $fraud = $notif->fraud_status;
+          $donation = Donation::where('donation_code', $orderId)->first();
+
+          if ($transaction == 'capture') {
+            if ($type == 'credit_card') {
+
+              if($fraud == 'challenge') {
+                $donation->setStatusPending();
+              } else {
+                $donation->setStatusSuccess();
+              }
+
+            }
+          } elseif ($transaction == 'settlement') {
+
+            $donation->setStatusSuccess();
+
+          } elseif($transaction == 'pending'){
+
+              $donation->setStatusPending();
+
+          } elseif ($transaction == 'deny') {
+
+              $donation->setStatusFailed();
+
+          } elseif ($transaction == 'expire') {
+
+              $donation->setStatusExpired();
+
+          } elseif ($transaction == 'cancel') {
+
+              $donation->setStatusFailed();
+
+          }
+
+        });
+
+        return;
     }
 }
